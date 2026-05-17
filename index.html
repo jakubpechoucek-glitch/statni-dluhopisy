@@ -30,14 +30,92 @@
     const FIXED_RATE_BY_YEAR = [0.035, 0.035, 0.045, 0.045, 0.065];
     const FLEXI_RATE = 0.035;
     const BAR_COLORS = { fixed: "#1a6fff", flexi: "#00c896", inflation: "#ff7a3d" };
+
     const PRESETS = [
-      { value: 10_000, label: "10 tis." },
-      { value: 50_000, label: "50 tis." },
-      { value: 100_000, label: "100 tis." },
-      { value: 500_000, label: "500 tis." },
-      { value: 1_000_000, label: "1 mil." },
-      { value: 3_000_000, label: "3 mil." },
+      { value: 10_000,    cs: "10 tis.",  en: "10K" },
+      { value: 50_000,    cs: "50 tis.",  en: "50K" },
+      { value: 100_000,   cs: "100 tis.", en: "100K" },
+      { value: 500_000,   cs: "500 tis.", en: "500K" },
+      { value: 1_000_000, cs: "1 mil.",   en: "1M" },
+      { value: 3_000_000, cs: "3 mil.",   en: "3M" },
     ];
+
+    const TR = {
+      cs: {
+        pageTitle: "Dluhopis Republiky – kalkulačka výnosů",
+        headerSub: "Ministerstvo financí ČR · Emise 15. 7. 2026",
+        headerTitle: "Dluhopis Republiky",
+        headerDesc: (inv) => `Investice ${inv} · bez daně z příjmů`,
+        investmentLabel: "Investovaná částka",
+        periodLabel: "Délka investice",
+        yearWord: (y) => y === 1 ? "rok" : y < 5 ? "roky" : "let",
+        yearShort: "r",
+        inflationTitle: "Scénář inflace",
+        inflationAvg: (y) => `Průměr za ${y} ${y === 1 ? "rok" : "let"}`,
+        modeUnified: "Stejná pro všechny roky",
+        modePerYear: "Po letech",
+        sliderAllYears: "Všechny roky",
+        sliderYear: (y) => `Rok ${y}`,
+        bestYield: "Nejvyšší výnos",
+        annualAvg: "Roční výnos (průměr)",
+        perYear: "/ rok",
+        chartTitle: "Vývoj hodnoty v čase (Kč)",
+        legendFixed: "Fixní",
+        legendInflation: (pct) => `Protiinflační (ø ${pct})`,
+        legendFlexi: "Flexi Bond",
+        notesTitle: "Důležité upozornění",
+        notes: [
+          <><strong style={{color:"#e8eaf2"}}>Osvobozeno od srážkové daně 15 %</strong> – částky jsou čisté</>,
+          <>Fixní dluhopis má <strong style={{color:"#e8eaf2"}}>stupňovité úročení</strong> – při výběru po 2 letech jen 3,5 % ročně místo 4,544 %</>,
+          <>Protiinflační výnos = <strong style={{color:"#e8eaf2"}}>skutečná meziroční inflace</strong> každý rok (tvůj scénář)</>,
+          <>Flexi Bond se <strong style={{color:"#e8eaf2"}}>automaticky obnovuje</strong> – sazba se může každé čtvrtletí změnit</>,
+          <>Limit 3 mil. Kč je <strong style={{color:"#e8eaf2"}}>na každý typ zvlášť</strong> – celkem lze investovat až 9 mil. Kč</>,
+        ],
+        footer: "pssd.sporicidluhopisycr.cz · Kalkulace jsou orientační",
+        bonds: (avgInfl) => [
+          { key: "fixed",     label: "Fixní dluhopis", icon: "🔵", sublabel: "5letý · 4,544 % p.a. průměr",                    note: "Stupňovitý výnos – nejvyšší v 5. roce" },
+          { key: "inflation", label: "Protiinflační",  icon: "🟠", sublabel: `5letý · CPI prům. ${fmtPct(avgInfl)} p.a.`,      note: "Výnos = inflace každý rok (tvůj scénář)" },
+          { key: "flexi",     label: "Flexi Bond",     icon: "🟢", sublabel: "3měsíční · 3,5 % p.a.",                          note: "Automaticky se obnovuje každé 3 měsíce" },
+        ],
+      },
+      en: {
+        pageTitle: "Republic Bond – yield calculator",
+        headerSub: "Ministry of Finance CR · Issue 15 Jul 2026",
+        headerTitle: "Republic Bond",
+        headerDesc: (inv) => `Investment ${inv} · income tax-free`,
+        investmentLabel: "Investment amount",
+        periodLabel: "Investment period",
+        yearWord: (y) => y === 1 ? "year" : "years",
+        yearShort: "y",
+        inflationTitle: "Inflation scenario",
+        inflationAvg: (y) => `Average over ${y} ${y === 1 ? "year" : "years"}`,
+        modeUnified: "Same for all years",
+        modePerYear: "Per year",
+        sliderAllYears: "All years",
+        sliderYear: (y) => `Year ${y}`,
+        bestYield: "Best yield",
+        annualAvg: "Annual yield (avg)",
+        perYear: "/ yr",
+        chartTitle: "Value over time (CZK)",
+        legendFixed: "Fixed",
+        legendInflation: (pct) => `Inflation-linked (ø ${pct})`,
+        legendFlexi: "Flexi Bond",
+        notesTitle: "Important notice",
+        notes: [
+          <><strong style={{color:"#e8eaf2"}}>Exempt from 15% withholding tax</strong> – amounts shown are net</>,
+          <>Fixed bond has <strong style={{color:"#e8eaf2"}}>stepped yield</strong> – early exit after 2 years earns only 3.5% p.a. instead of 4.544%</>,
+          <>Inflation-linked yield = <strong style={{color:"#e8eaf2"}}>actual year-on-year CPI</strong> each year (your scenario above)</>,
+          <>Flexi Bond <strong style={{color:"#e8eaf2"}}>auto-renews</strong> every quarter – rate may change each period</>,
+          <>The 3M CZK limit applies <strong style={{color:"#e8eaf2"}}>per bond type</strong> – up to 9M CZK total across all three</>,
+        ],
+        footer: "pssd.sporicidluhopisycr.cz · Calculations are indicative",
+        bonds: (avgInfl) => [
+          { key: "fixed",     label: "Fixed Bond",       icon: "🔵", sublabel: "5-year · 4.544% p.a. average",                   note: "Stepped yield – highest in year 5" },
+          { key: "inflation", label: "Inflation-linked", icon: "🟠", sublabel: `5-year · CPI avg. ${fmtPct(avgInfl)} p.a.`,       note: "Yield = inflation each year (your scenario)" },
+          { key: "flexi",     label: "Flexi Bond",       icon: "🟢", sublabel: "3-month · 3.5% p.a.",                            note: "Auto-renews every 3 months" },
+        ],
+      },
+    };
 
     function calcFixed(inv) {
       let value = inv;
@@ -72,10 +150,41 @@
     function fmt(n) { return n.toLocaleString("cs-CZ") + " Kč"; }
     function fmtGain(n) { return (n >= 0 ? "+" : "") + n.toLocaleString("cs-CZ") + " Kč"; }
     function fmtPct(r) { return (r * 100).toFixed(1) + " %"; }
-    function fmtInv(n) {
-      if (n >= 1_000_000) return (n / 1_000_000).toLocaleString("cs-CZ", { maximumFractionDigits: 2 }) + " mil. Kč";
-      if (n >= 1_000) return (n / 1_000).toLocaleString("cs-CZ", { maximumFractionDigits: 0 }) + " tis. Kč";
-      return n.toLocaleString("cs-CZ") + " Kč";
+    function fmtInv(n, lang) {
+      const locale = lang === "en" ? "en-GB" : "cs-CZ";
+      if (lang === "en") {
+        if (n >= 1_000_000) return (n / 1_000_000).toLocaleString(locale, { maximumFractionDigits: 2 }) + "M CZK";
+        if (n >= 1_000)     return (n / 1_000).toLocaleString(locale, { maximumFractionDigits: 0 }) + "K CZK";
+        return n.toLocaleString(locale) + " CZK";
+      }
+      if (n >= 1_000_000) return (n / 1_000_000).toLocaleString(locale, { maximumFractionDigits: 2 }) + " mil. Kč";
+      if (n >= 1_000)     return (n / 1_000).toLocaleString(locale, { maximumFractionDigits: 0 }) + " tis. Kč";
+      return n.toLocaleString(locale) + " Kč";
+    }
+
+    function LangSwitcher({ lang, setLang }) {
+      return (
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          {[
+            { code: "cs", flag: "🇨🇿", label: "CS" },
+            { code: "en", flag: "🇬🇧", label: "EN" },
+          ].map(({ code, flag, label }) => (
+            <button key={code} onClick={() => setLang(code)}
+              title={code === "cs" ? "Čeština" : "English"}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                background: lang === code ? "#1e2540" : "transparent",
+                border: `1px solid ${lang === code ? "#3a4060" : "transparent"}`,
+                borderRadius: 8, padding: "5px 10px", cursor: "pointer",
+                fontFamily: "inherit", transition: "all 0.15s",
+              }}
+            >
+              <span style={{ fontSize: 18, lineHeight: 1 }}>{flag}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: lang === code ? "#e8eaf2" : "#3a4060" }}>{label}</span>
+            </button>
+          ))}
+        </div>
+      );
     }
 
     function SliderRow({ label, value, onChange, dimmed }) {
@@ -100,25 +209,27 @@
     }
 
     function App() {
+      const [lang, setLang] = useState("cs");
       const [investment, setInvestment] = useState(3_000_000);
       const [year, setYear] = useState(5);
       const [inflMode, setInflMode] = useState("unified");
       const [unifiedRate, setUnifiedRate] = useState(0.035);
       const [perYearRates, setPerYearRates] = useState([0.025, 0.030, 0.035, 0.040, 0.045]);
 
+      const t = TR[lang];
+
       const inflRates = inflMode === "unified"
         ? Array(5).fill(unifiedRate)
         : perYearRates;
 
-      const fixedData = calcFixed(investment);
-      const flexiData = calcFlexi(investment);
+      const fixedData    = calcFixed(investment);
+      const flexiData    = calcFlexi(investment);
       const inflationData = calcInflation(investment, inflRates);
 
-      const avgInfl = inflRates.slice(0, year).reduce((a, b) => a + b, 0) / year;
-
+      const avgInfl    = inflRates.slice(0, year).reduce((a, b) => a + b, 0) / year;
       const fixedAtYear = fixedData[year];
       const flexiAtYear = flexiData[year];
-      const inflAtYear = inflationData[year];
+      const inflAtYear  = inflationData[year];
 
       const allValsAtYear = [fixedAtYear.value, flexiAtYear.value, inflAtYear.value];
       const maxVal = Math.max(...allValsAtYear);
@@ -127,26 +238,11 @@
         return range === 0 ? 0 : ((val - investment) / range) * 70;
       };
 
-      const bonds = [
-        {
-          key: "fixed", label: "Fixní dluhopis", icon: "🔵",
-          sublabel: "5letý · 4,544 % p.a. průměr",
-          data: fixedAtYear, color: BAR_COLORS.fixed,
-          note: "Stupňovitý výnos – nejvyšší v 5. roce",
-        },
-        {
-          key: "inflation", label: "Protiinflační", icon: "🟠",
-          sublabel: `5letý · CPI prům. ${fmtPct(avgInfl)} p.a.`,
-          data: inflAtYear, color: BAR_COLORS.inflation,
-          note: "Výnos = inflace každý rok (tvůj scénář)",
-        },
-        {
-          key: "flexi", label: "Flexi Bond", icon: "🟢",
-          sublabel: "3měsíční · 3,5 % p.a.",
-          data: flexiAtYear, color: BAR_COLORS.flexi,
-          note: "Automaticky se obnovuje každé 3 měsíce",
-        },
-      ];
+      const bonds = t.bonds(avgInfl).map((b, i) => ({
+        ...b,
+        color: [BAR_COLORS.fixed, BAR_COLORS.inflation, BAR_COLORS.flexi][i],
+        data: [fixedAtYear, inflAtYear, flexiAtYear][i],
+      }));
 
       const allVals = [
         ...fixedData.map(d => d.value),
@@ -164,20 +260,24 @@
           fontFamily: "'DM Mono', 'Fira Mono', 'Courier New', monospace",
           color: "#e8eaf2", padding: "32px 20px 60px", maxWidth: 720, margin: "0 auto",
         }}>
+
           {/* Header */}
           <div style={{ marginBottom: 36 }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.25em", color: "#5a6080", textTransform: "uppercase", marginBottom: 8 }}>
-              Ministerstvo financí ČR · Emise 15. 7. 2026
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.25em", color: "#5a6080", textTransform: "uppercase" }}>
+                {t.headerSub}
+              </div>
+              <LangSwitcher lang={lang} setLang={setLang} />
             </div>
             <h1 style={{
               fontSize: "clamp(22px, 5vw, 32px)", fontWeight: 700, margin: 0,
               fontFamily: "'DM Serif Display', 'Georgia', serif",
               letterSpacing: "-0.01em", lineHeight: 1.15, color: "#ffffff",
             }}>
-              Dluhopis Republiky
+              {t.headerTitle}
             </h1>
             <div style={{ color: "#5a6080", fontSize: 13, marginTop: 6 }}>
-              Investice {fmt(investment)} · bez daně z příjmů
+              {t.headerDesc(fmt(investment))}
             </div>
           </div>
 
@@ -185,10 +285,10 @@
           <div style={{ background: "#13182a", borderRadius: 12, padding: "20px 24px", marginBottom: 20, border: "1px solid #1e2540" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
               <span style={{ fontSize: 11, color: "#5a6080", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                Investovaná částka
+                {t.investmentLabel}
               </span>
               <span style={{ fontSize: 22, fontWeight: 700, color: "#fff", fontFamily: "'DM Serif Display', Georgia, serif" }}>
-                {fmtInv(investment)}
+                {fmtInv(investment, lang)}
               </span>
             </div>
             <input type="range" min={1_000} max={3_000_000} step={1_000} value={investment}
@@ -208,7 +308,7 @@
                     fontFamily: "inherit", transition: "all 0.15s",
                     whiteSpace: "nowrap",
                   }}
-                >{p.label}</button>
+                >{p[lang]}</button>
               ))}
             </div>
           </div>
@@ -217,10 +317,10 @@
           <div style={{ background: "#13182a", borderRadius: 12, padding: "20px 24px", marginBottom: 20, border: "1px solid #1e2540" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
               <span style={{ fontSize: 11, color: "#5a6080", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                Délka investice
+                {t.periodLabel}
               </span>
               <span style={{ fontSize: 22, fontWeight: 700, color: "#fff", fontFamily: "'DM Serif Display', Georgia, serif" }}>
-                {year} {year === 1 ? "rok" : year < 5 ? "roky" : "let"}
+                {year} {t.yearWord(year)}
               </span>
             </div>
             <input type="range" min={1} max={5} value={year}
@@ -229,7 +329,9 @@
             />
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginTop: 6 }}>
               {[1, 2, 3, 4, 5].map(y => (
-                <span key={y} style={{ color: y === year ? "#1a6fff" : "#3a4060", fontWeight: y === year ? 700 : 400 }}>{y}r</span>
+                <span key={y} style={{ color: y === year ? "#1a6fff" : "#3a4060", fontWeight: y === year ? 700 : 400 }}>
+                  {y}{t.yearShort}
+                </span>
               ))}
             </div>
           </div>
@@ -239,15 +341,15 @@
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
               <div>
                 <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: "#ff7a3d", marginBottom: 3 }}>
-                  🟠 Scénář inflace
+                  🟠 {t.inflationTitle}
                 </div>
                 <div style={{ fontSize: 11, color: "#5a6080" }}>
-                  Průměr za {year} {year === 1 ? "rok" : "let"}:{" "}
+                  {t.inflationAvg(year)}:{" "}
                   <strong style={{ color: "#ff7a3d" }}>{fmtPct(avgInfl)}</strong>
                 </div>
               </div>
               <div style={{ display: "flex", background: "#0b0f1a", borderRadius: 8, padding: 3, gap: 2 }}>
-                {[["unified", "Stejná pro všechny roky"], ["peryear", "Po letech"]].map(([val, lbl]) => (
+                {[["unified", t.modeUnified], ["peryear", t.modePerYear]].map(([val, lbl]) => (
                   <button key={val} onClick={() => setInflMode(val)}
                     style={{
                       background: inflMode === val ? "#ff7a3d" : "transparent",
@@ -263,10 +365,10 @@
             </div>
 
             {inflMode === "unified" ? (
-              <SliderRow label="Všechny roky" value={unifiedRate} onChange={setUnifiedRate} dimmed={false} />
+              <SliderRow label={t.sliderAllYears} value={unifiedRate} onChange={setUnifiedRate} dimmed={false} />
             ) : (
               [1, 2, 3, 4, 5].map(y => (
-                <SliderRow key={y} label={`Rok ${y}`}
+                <SliderRow key={y} label={t.sliderYear(y)}
                   value={perYearRates[y - 1]}
                   dimmed={y > year}
                   onChange={v => {
@@ -296,7 +398,7 @@
                     }} />
                   </div>
                   <div style={{ fontSize: 9, color: i < year ? "#ff7a3d" : "#3a4060", marginTop: 3 }}>{fmtPct(r)}</div>
-                  <div style={{ fontSize: 9, color: "#2a3050" }}>r{i + 1}</div>
+                  <div style={{ fontSize: 9, color: "#2a3050" }}>{t.yearShort}{i + 1}</div>
                 </div>
               ))}
             </div>
@@ -320,7 +422,7 @@
                       background: b.color, color: "#000", fontSize: 9,
                       fontWeight: 700, letterSpacing: "0.12em",
                       padding: "3px 8px", borderRadius: 4, textTransform: "uppercase",
-                    }}>Nejvyšší výnos</div>
+                    }}>{t.bestYield}</div>
                   )}
                   <div style={{
                     position: "absolute", bottom: 0, left: 0, height: 3,
@@ -345,8 +447,8 @@
                     </div>
                   </div>
                   <div style={{ marginTop: 12, background: "#0b0f1a", borderRadius: 8, padding: "9px 14px", display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-                    <span style={{ color: "#3a4060" }}>Roční výnos (průměr)</span>
-                    <span style={{ color: "#a0a8c0" }}>{fmt(Math.round(b.data.gain / year))} / rok</span>
+                    <span style={{ color: "#3a4060" }}>{t.annualAvg}</span>
+                    <span style={{ color: "#a0a8c0" }}>{fmt(Math.round(b.data.gain / year))} {t.perYear}</span>
                   </div>
                   <div style={{ marginTop: 9, fontSize: 11, color: "#3a4060" }}>⚠ {b.note}</div>
                 </div>
@@ -357,7 +459,7 @@
           {/* Line chart */}
           <div style={{ background: "#13182a", border: "1px solid #1e2540", borderRadius: 12, padding: "20px 22px", marginBottom: 24 }}>
             <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: "#5a6080", marginBottom: 16 }}>
-              Vývoj hodnoty v čase (Kč)
+              {t.chartTitle}
             </div>
             <svg viewBox="0 0 600 160" style={{ width: "100%", height: "auto" }}>
               {[0, 1, 2, 3].map(i => (
@@ -373,9 +475,9 @@
                 );
               })}
               {[
-                { data: fixedData, color: BAR_COLORS.fixed },
+                { data: fixedData,    color: BAR_COLORS.fixed },
                 { data: inflationData, color: BAR_COLORS.inflation },
-                { data: flexiData, color: BAR_COLORS.flexi },
+                { data: flexiData,    color: BAR_COLORS.flexi },
               ].map(({ data, color }) => {
                 const pts = data.map(d => `${toX(d.year)},${toY(d.value)}`).join(" ");
                 return (
@@ -386,14 +488,16 @@
               <line x1={toX(year)} x2={toX(year)} y1={10} y2={150}
                 stroke="#ffffff33" strokeWidth="1.5" strokeDasharray="3,3" />
               {[0, 1, 2, 3, 4, 5].map(y => (
-                <text key={y} x={toX(y)} y={158} textAnchor="middle" fontSize={9} fill="#3a4060">{y}r</text>
+                <text key={y} x={toX(y)} y={158} textAnchor="middle" fontSize={9} fill="#3a4060">
+                  {y}{t.yearShort}
+                </text>
               ))}
             </svg>
             <div style={{ display: "flex", gap: 20, marginTop: 10, flexWrap: "wrap" }}>
               {[
-                { label: "Fixní", color: BAR_COLORS.fixed },
-                { label: `Protiinflační (ø ${fmtPct(avgInfl)})`, color: BAR_COLORS.inflation },
-                { label: "Flexi Bond", color: BAR_COLORS.flexi },
+                { label: t.legendFixed,                         color: BAR_COLORS.fixed },
+                { label: t.legendInflation(fmtPct(avgInfl)),    color: BAR_COLORS.inflation },
+                { label: t.legendFlexi,                         color: BAR_COLORS.flexi },
               ].map(l => (
                 <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#5a6080" }}>
                   <div style={{ width: 20, height: 3, background: l.color, borderRadius: 2 }} />
@@ -406,17 +510,15 @@
           {/* Notes */}
           <div style={{ background: "#13182a", border: "1px solid #1e2540", borderRadius: 12, padding: "18px 22px", fontSize: 12, color: "#5a6080", lineHeight: 1.7 }}>
             <div style={{ color: "#a0a8c0", fontWeight: 600, marginBottom: 8, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-              Důležité upozornění
+              {t.notesTitle}
             </div>
-            <div>• Výnosy jsou <strong style={{ color: "#e8eaf2" }}>osvobozeny od srážkové daně 15 %</strong> – částky jsou čisté</div>
-            <div>• Fixní dluhopis má <strong style={{ color: "#e8eaf2" }}>stupňovité úročení</strong> – při výběru po 2 letech jen 3,5 % ročně místo 4,544 %</div>
-            <div>• Protiinflační výnos = <strong style={{ color: "#e8eaf2" }}>skutečná meziroční inflace</strong> každý rok (tvůj scénář)</div>
-            <div>• Flexi Bond se <strong style={{ color: "#e8eaf2" }}>automaticky obnovuje</strong> – sazba se může každé čtvrtletí změnit</div>
-            <div>• Limit 3 mil. Kč je <strong style={{ color: "#e8eaf2" }}>na každý typ zvlášť</strong> – celkem lze investovat až 9 mil. Kč</div>
+            {t.notes.map((note, i) => (
+              <div key={i}>• {note}</div>
+            ))}
           </div>
 
           <div style={{ textAlign: "center", marginTop: 28, fontSize: 10, color: "#2a3050", letterSpacing: "0.1em" }}>
-            pssd.sporicidluhopisycr.cz · Kalkulace jsou orientační
+            {t.footer}
           </div>
         </div>
       );
