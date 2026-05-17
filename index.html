@@ -27,37 +27,44 @@
   <script type="text/babel">
     const { useState } = React;
 
-    const INVESTMENT = 3_000_000;
     const FIXED_RATE_BY_YEAR = [0.035, 0.035, 0.045, 0.045, 0.065];
     const FLEXI_RATE = 0.035;
     const BAR_COLORS = { fixed: "#1a6fff", flexi: "#00c896", inflation: "#ff7a3d" };
+    const PRESETS = [
+      { value: 500_000, label: "500 tis." },
+      { value: 1_000_000, label: "1 mil." },
+      { value: 2_000_000, label: "2 mil." },
+      { value: 3_000_000, label: "3 mil." },
+      { value: 5_000_000, label: "5 mil." },
+      { value: 9_000_000, label: "9 mil." },
+    ];
 
-    function calcFixed() {
-      let value = INVESTMENT;
-      const results = [{ year: 0, value: INVESTMENT, gain: 0 }];
+    function calcFixed(inv) {
+      let value = inv;
+      const results = [{ year: 0, value: inv, gain: 0 }];
       for (let y = 1; y <= 5; y++) {
         value = value * (1 + FIXED_RATE_BY_YEAR[y - 1]);
-        results.push({ year: y, value: Math.round(value), gain: Math.round(value - INVESTMENT) });
+        results.push({ year: y, value: Math.round(value), gain: Math.round(value - inv) });
       }
       return results;
     }
 
-    function calcFlexi() {
-      let value = INVESTMENT;
-      const results = [{ year: 0, value: INVESTMENT, gain: 0 }];
+    function calcFlexi(inv) {
+      let value = inv;
+      const results = [{ year: 0, value: inv, gain: 0 }];
       for (let y = 1; y <= 5; y++) {
         value = value * (1 + FLEXI_RATE);
-        results.push({ year: y, value: Math.round(value), gain: Math.round(value - INVESTMENT) });
+        results.push({ year: y, value: Math.round(value), gain: Math.round(value - inv) });
       }
       return results;
     }
 
-    function calcInflation(ratesByYear) {
-      let value = INVESTMENT;
-      const results = [{ year: 0, value: INVESTMENT, gain: 0 }];
+    function calcInflation(inv, ratesByYear) {
+      let value = inv;
+      const results = [{ year: 0, value: inv, gain: 0 }];
       for (let y = 1; y <= 5; y++) {
         value = value * (1 + ratesByYear[y - 1]);
-        results.push({ year: y, value: Math.round(value), gain: Math.round(value - INVESTMENT) });
+        results.push({ year: y, value: Math.round(value), gain: Math.round(value - inv) });
       }
       return results;
     }
@@ -65,6 +72,10 @@
     function fmt(n) { return n.toLocaleString("cs-CZ") + " Kč"; }
     function fmtGain(n) { return (n >= 0 ? "+" : "") + n.toLocaleString("cs-CZ") + " Kč"; }
     function fmtPct(r) { return (r * 100).toFixed(1) + " %"; }
+    function fmtInv(n) {
+      if (n >= 1_000_000) return (n / 1_000_000).toLocaleString("cs-CZ", { maximumFractionDigits: 1 }) + " mil. Kč";
+      return (n / 1_000).toLocaleString("cs-CZ", { maximumFractionDigits: 0 }) + " tis. Kč";
+    }
 
     function SliderRow({ label, value, onChange, dimmed }) {
       return (
@@ -88,6 +99,7 @@
     }
 
     function App() {
+      const [investment, setInvestment] = useState(3_000_000);
       const [year, setYear] = useState(5);
       const [inflMode, setInflMode] = useState("unified");
       const [unifiedRate, setUnifiedRate] = useState(0.035);
@@ -97,9 +109,9 @@
         ? Array(5).fill(unifiedRate)
         : perYearRates;
 
-      const fixedData = calcFixed();
-      const flexiData = calcFlexi();
-      const inflationData = calcInflation(inflRates);
+      const fixedData = calcFixed(investment);
+      const flexiData = calcFlexi(investment);
+      const inflationData = calcInflation(investment, inflRates);
 
       const avgInfl = inflRates.slice(0, year).reduce((a, b) => a + b, 0) / year;
 
@@ -110,8 +122,8 @@
       const allValsAtYear = [fixedAtYear.value, flexiAtYear.value, inflAtYear.value];
       const maxVal = Math.max(...allValsAtYear);
       const barPct = (val) => {
-        const range = maxVal - INVESTMENT;
-        return range === 0 ? 0 : ((val - INVESTMENT) / range) * 70;
+        const range = maxVal - investment;
+        return range === 0 ? 0 : ((val - investment) / range) * 70;
       };
 
       const bonds = [
@@ -141,7 +153,7 @@
         ...inflationData.map(d => d.value),
       ];
       const chartMax = Math.max(...allVals);
-      const chartMin = INVESTMENT;
+      const chartMin = investment;
       const toX = y => 60 + (y / 5) * 510;
       const toY = v => 140 - ((v - chartMin) / (chartMax - chartMin)) * 115;
 
@@ -164,7 +176,39 @@
               Dluhopis Republiky
             </h1>
             <div style={{ color: "#5a6080", fontSize: 13, marginTop: 6 }}>
-              Investice 3 000 000 Kč · bez daně z příjmů
+              Investice {fmt(investment)} · bez daně z příjmů
+            </div>
+          </div>
+
+          {/* Investment amount */}
+          <div style={{ background: "#13182a", borderRadius: 12, padding: "20px 24px", marginBottom: 20, border: "1px solid #1e2540" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <span style={{ fontSize: 11, color: "#5a6080", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                Investovaná částka
+              </span>
+              <span style={{ fontSize: 22, fontWeight: 700, color: "#fff", fontFamily: "'DM Serif Display', Georgia, serif" }}>
+                {fmtInv(investment)}
+              </span>
+            </div>
+            <input type="range" min={100_000} max={9_000_000} step={100_000} value={investment}
+              onChange={e => setInvestment(Number(e.target.value))}
+              style={{ width: "100%", "--accent": "#a0a8c0", cursor: "pointer" }}
+            />
+            <div style={{ display: "flex", gap: 6, marginTop: 14, flexWrap: "wrap" }}>
+              {PRESETS.map(p => (
+                <button key={p.value} onClick={() => setInvestment(p.value)}
+                  style={{
+                    flex: "1 1 auto",
+                    background: investment === p.value ? "#e8eaf2" : "#0b0f1a",
+                    color: investment === p.value ? "#0b0f1a" : "#5a6080",
+                    border: `1px solid ${investment === p.value ? "#e8eaf2" : "#1e2540"}`,
+                    borderRadius: 8, padding: "7px 10px",
+                    fontSize: 12, fontWeight: 700, cursor: "pointer",
+                    fontFamily: "inherit", transition: "all 0.15s",
+                    whiteSpace: "nowrap",
+                  }}
+                >{p.label}</button>
+              ))}
             </div>
           </div>
 
