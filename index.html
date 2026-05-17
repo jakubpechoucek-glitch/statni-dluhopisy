@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dluhopis Republiky – kalkulačka výnosů</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0b0f1a; }
+    input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 3px; background: #1e2540; outline: none; cursor: pointer; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent, #1a6fff); cursor: pointer; border: 2px solid #0b0f1a; }
+    input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--accent, #1a6fff); cursor: pointer; border: 2px solid #0b0f1a; }
+    input[type=range]:disabled { opacity: 0.4; cursor: default; }
+    input[type=range]:disabled::-webkit-slider-thumb { cursor: default; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const INVESTMENT = 3_000_000;
+    const FIXED_RATE_BY_YEAR = [0.035, 0.035, 0.045, 0.045, 0.065];
+    const FLEXI_RATE = 0.035;
+    const BAR_COLORS = { fixed: "#1a6fff", flexi: "#00c896", inflation: "#ff7a3d" };
+
+    function calcFixed() {
+      let value = INVESTMENT;
+      const results = [{ year: 0, value: INVESTMENT, gain: 0 }];
+      for (let y = 1; y <= 5; y++) {
+        value = value * (1 + FIXED_RATE_BY_YEAR[y - 1]);
+        results.push({ year: y, value: Math.round(value), gain: Math.round(value - INVESTMENT) });
+      }
+      return results;
+    }
+
+    function calcFlexi() {
+      let value = INVESTMENT;
+      const results = [{ year: 0, value: INVESTMENT, gain: 0 }];
+      for (let y = 1; y <= 5; y++) {
+        value = value * (1 + FLEXI_RATE);
+        results.push({ year: y, value: Math.round(value), gain: Math.round(value - INVESTMENT) });
+      }
+      return results;
+    }
+
+    function calcInflation(ratesByYear) {
+      let value = INVESTMENT;
+      const results = [{ year: 0, value: INVESTMENT, gain: 0 }];
+      for (let y = 1; y <= 5; y++) {
+        value = value * (1 + ratesByYear[y - 1]);
+        results.push({ year: y, value: Math.round(value), gain: Math.round(value - INVESTMENT) });
+      }
+      return results;
+    }
+
+    function fmt(n) { return n.toLocaleString("cs-CZ") + " Kč"; }
+    function fmtGain(n) { return (n >= 0 ? "+" : "") + n.toLocaleString("cs-CZ") + " Kč"; }
+    function fmtPct(r) { return (r * 100).toFixed(1) + " %"; }
+
+    function SliderRow({ label, value, onChange, dimmed }) {
+      return (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, opacity: dimmed ? 0.4 : 1, transition: "opacity 0.2s" }}>
+          <span style={{ fontSize: 11, color: "#5a6080", minWidth: 52 }}>{label}</span>
+          <input
+            type="range" min={0} max={15} step={0.5}
+            value={value * 100}
+            onChange={e => onChange(Number(e.target.value) / 100)}
+            style={{ flex: 1, "--accent": BAR_COLORS.inflation, cursor: "pointer" }}
+            disabled={dimmed}
+          />
+          <span style={{
+            fontSize: 13, fontWeight: 700, minWidth: 42, textAlign: "right",
+            color: value >= 0.05 ? "#ff7a3d" : value >= 0.03 ? "#e8eaf2" : "#a0a8c0",
+          }}>
+            {fmtPct(value)}
+          </span>
+        </div>
+      );
+    }
+
+    function App() {
+      const [year, setYear] = useState(5);
+      const [inflMode, setInflMode] = useState("unified");
+      const [unifiedRate, setUnifiedRate] = useState(0.035);
+      const [perYearRates, setPerYearRates] = useState([0.025, 0.030, 0.035, 0.040, 0.045]);
+
+      const inflRates = inflMode === "unified"
+        ? Array(5).fill(unifiedRate)
+        : perYearRates;
+
+      const fixedData = calcFixed();
+      const flexiData = calcFlexi();
+      const inflationData = calcInflation(inflRates);
+
+      const avgInfl = inflRates.slice(0, year).reduce((a, b) => a + b, 0) / year;
+
+      const fixedAtYear = fixedData[year];
+      const flexiAtYear = flexiData[year];
+      const inflAtYear = inflationData[year];
+
+      const allValsAtYear = [fixedAtYear.value, flexiAtYear.value, inflAtYear.value];
+      const maxVal = Math.max(...allValsAtYear);
+      const barPct = (val) => {
+        const range = maxVal - INVESTMENT;
+        return range === 0 ? 0 : ((val - INVESTMENT) / range) * 70;
+      };
+
+      const bonds = [
+        {
+          key: "fixed", label: "Fixní dluhopis", icon: "🔵",
+          sublabel: "5letý · 4,544 % p.a. průměr",
+          data: fixedAtYear, color: BAR_COLORS.fixed,
+          note: "Stupňovitý výnos – nejvyšší v 5. roce",
+        },
+        {
+          key: "inflation", label: "Protiinflační", icon: "🟠",
+          sublabel: `5letý · CPI prům. ${fmtPct(avgInfl)} p.a.`,
+          data: inflAtYear, color: BAR_COLORS.inflation,
+          note: "Výnos = inflace každý rok (tvůj scénář)",
+        },
+        {
+          key: "flexi", label: "Flexi Bond", icon: "🟢",
+          sublabel: "3měsíční · 3,5 % p.a.",
+          data: flexiAtYear, color: BAR_COLORS.flexi,
+          note: "Automaticky se obnovuje každé 3 měsíce",
+        },
+      ];
+
+      const allVals = [
+        ...fixedData.map(d => d.value),
+        ...flexiData.map(d => d.value),
+        ...inflationData.map(d => d.value),
+      ];
+      const chartMax = Math.max(...allVals);
+      const chartMin = INVESTMENT;
+      const toX = y => 60 + (y / 5) * 510;
+      const toY = v => 140 - ((v - chartMin) / (chartMax - chartMin)) * 115;
+
+      return (
+        <div style={{
+          minHeight: "100vh", background: "#0b0f1a",
+          fontFamily: "'DM Mono', 'Fira Mono', 'Courier New', monospace",
+          color: "#e8eaf2", padding: "32px 20px 60px", maxWidth: 720, margin: "0 auto",
+        }}>
+          {/* Header */}
+          <div style={{ marginBottom: 36 }}>
+            <div style={{ fontSize: 11, letterSpacing: "0.25em", color: "#5a6080", textTransform: "uppercase", marginBottom: 8 }}>
+              Ministerstvo financí ČR · Emise 15. 7. 2026
+            </div>
+            <h1 style={{
+              fontSize: "clamp(22px, 5vw, 32px)", fontWeight: 700, margin: 0,
+              fontFamily: "'DM Serif Display', 'Georgia', serif",
+              letterSpacing: "-0.01em", lineHeight: 1.15, color: "#ffffff",
+            }}>
+              Dluhopis Republiky
+            </h1>
+            <div style={{ color: "#5a6080", fontSize: 13, marginTop: 6 }}>
+              Investice 3 000 000 Kč · bez daně z příjmů
+            </div>
+          </div>
+
+          {/* Year slider */}
+          <div style={{ background: "#13182a", borderRadius: 12, padding: "20px 24px", marginBottom: 20, border: "1px solid #1e2540" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <span style={{ fontSize: 11, color: "#5a6080", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                Délka investice
+              </span>
+              <span style={{ fontSize: 22, fontWeight: 700, color: "#fff", fontFamily: "'DM Serif Display', Georgia, serif" }}>
+                {year} {year === 1 ? "rok" : year < 5 ? "roky" : "let"}
+              </span>
+            </div>
+            <input type="range" min={1} max={5} value={year}
+              onChange={e => setYear(Number(e.target.value))}
+              style={{ width: "100%", "--accent": "#1a6fff", cursor: "pointer" }}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginTop: 6 }}>
+              {[1, 2, 3, 4, 5].map(y => (
+                <span key={y} style={{ color: y === year ? "#1a6fff" : "#3a4060", fontWeight: y === year ? 700 : 400 }}>{y}r</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Inflation control */}
+          <div style={{ background: "#13182a", borderRadius: 12, padding: "20px 24px", marginBottom: 24, border: "1px solid #ff7a3d33" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: "#ff7a3d", marginBottom: 3 }}>
+                  🟠 Scénář inflace
+                </div>
+                <div style={{ fontSize: 11, color: "#5a6080" }}>
+                  Průměr za {year} {year === 1 ? "rok" : "let"}:{" "}
+                  <strong style={{ color: "#ff7a3d" }}>{fmtPct(avgInfl)}</strong>
+                </div>
+              </div>
+              <div style={{ display: "flex", background: "#0b0f1a", borderRadius: 8, padding: 3, gap: 2 }}>
+                {[["unified", "Stejná pro všechny roky"], ["peryear", "Po letech"]].map(([val, lbl]) => (
+                  <button key={val} onClick={() => setInflMode(val)}
+                    style={{
+                      background: inflMode === val ? "#ff7a3d" : "transparent",
+                      color: inflMode === val ? "#000" : "#5a6080",
+                      border: "none", borderRadius: 6, padding: "5px 10px",
+                      fontSize: 11, fontWeight: 700, cursor: "pointer",
+                      fontFamily: "inherit", transition: "all 0.2s",
+                      whiteSpace: "nowrap",
+                    }}
+                  >{lbl}</button>
+                ))}
+              </div>
+            </div>
+
+            {inflMode === "unified" ? (
+              <SliderRow label="Všechny roky" value={unifiedRate} onChange={setUnifiedRate} dimmed={false} />
+            ) : (
+              [1, 2, 3, 4, 5].map(y => (
+                <SliderRow key={y} label={`Rok ${y}`}
+                  value={perYearRates[y - 1]}
+                  dimmed={y > year}
+                  onChange={v => {
+                    const next = [...perYearRates];
+                    next[y - 1] = v;
+                    setPerYearRates(next);
+                  }}
+                />
+              ))
+            )}
+
+            {/* Mini bar chart of inflation by year */}
+            <div style={{ display: "flex", gap: 4, marginTop: 14 }}>
+              {inflRates.map((r, i) => (
+                <div key={i} style={{ flex: 1, textAlign: "center" }}>
+                  <div style={{
+                    height: 32, background: "#0b0f1a", borderRadius: 4, position: "relative",
+                    overflow: "hidden",
+                    border: i < year ? "1px solid #ff7a3d44" : "1px solid #1e2540",
+                    opacity: i < year ? 1 : 0.35,
+                  }}>
+                    <div style={{
+                      position: "absolute", bottom: 0, left: 0, right: 0,
+                      height: `${Math.max(4, (r / 0.15) * 100)}%`,
+                      background: "linear-gradient(to top, #ff7a3d, #ff7a3d88)",
+                      transition: "height 0.3s ease",
+                    }} />
+                  </div>
+                  <div style={{ fontSize: 9, color: i < year ? "#ff7a3d" : "#3a4060", marginTop: 3 }}>{fmtPct(r)}</div>
+                  <div style={{ fontSize: 9, color: "#2a3050" }}>r{i + 1}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Cards */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 32 }}>
+            {bonds.map((b) => {
+              const pct = barPct(b.data.value);
+              const isMax = b.data.value === maxVal;
+              return (
+                <div key={b.key} style={{
+                  background: isMax ? "#0f1e38" : "#13182a",
+                  border: `1px solid ${isMax ? b.color + "55" : "#1e2540"}`,
+                  borderRadius: 12, padding: "20px 22px",
+                  position: "relative", overflow: "hidden", transition: "all 0.3s",
+                }}>
+                  {isMax && (
+                    <div style={{
+                      position: "absolute", top: 12, right: 14,
+                      background: b.color, color: "#000", fontSize: 9,
+                      fontWeight: 700, letterSpacing: "0.12em",
+                      padding: "3px 8px", borderRadius: 4, textTransform: "uppercase",
+                    }}>Nejvyšší výnos</div>
+                  )}
+                  <div style={{
+                    position: "absolute", bottom: 0, left: 0, height: 3,
+                    width: `${30 + pct}%`,
+                    background: `linear-gradient(90deg, ${b.color}88, ${b.color})`,
+                    borderRadius: "0 2px 0 0", transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)",
+                  }} />
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 2, fontFamily: "'DM Serif Display', Georgia, serif" }}>
+                        {b.icon} {b.label}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#5a6080" }}>{b.sublabel}</div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", fontFamily: "'DM Serif Display', Georgia, serif" }}>
+                        {fmt(b.data.value)}
+                      </div>
+                      <div style={{ fontSize: 13, color: b.color, fontWeight: 600, marginTop: 2 }}>
+                        {fmtGain(b.data.gain)}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 12, background: "#0b0f1a", borderRadius: 8, padding: "9px 14px", display: "flex", justifyContent: "space-between", fontSize: 11 }}>
+                    <span style={{ color: "#3a4060" }}>Roční výnos (průměr)</span>
+                    <span style={{ color: "#a0a8c0" }}>{fmt(Math.round(b.data.gain / year))} / rok</span>
+                  </div>
+                  <div style={{ marginTop: 9, fontSize: 11, color: "#3a4060" }}>⚠ {b.note}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Line chart */}
+          <div style={{ background: "#13182a", border: "1px solid #1e2540", borderRadius: 12, padding: "20px 22px", marginBottom: 24 }}>
+            <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: "#5a6080", marginBottom: 16 }}>
+              Vývoj hodnoty v čase (Kč)
+            </div>
+            <svg viewBox="0 0 600 160" style={{ width: "100%", height: "auto" }}>
+              {[0, 1, 2, 3].map(i => (
+                <line key={i} x1={60} x2={580} y1={20 + i * 40} y2={20 + i * 40}
+                  stroke="#1e2540" strokeWidth="1" strokeDasharray="4,4" />
+              ))}
+              {[0, 1, 2, 3].map(i => {
+                const val = chartMax - (i / 3) * (chartMax - chartMin);
+                return (
+                  <text key={i} x={55} y={24 + i * 40} textAnchor="end" fontSize={9} fill="#3a4060">
+                    {(val / 1_000_000).toFixed(2)}M
+                  </text>
+                );
+              })}
+              {[
+                { data: fixedData, color: BAR_COLORS.fixed },
+                { data: inflationData, color: BAR_COLORS.inflation },
+                { data: flexiData, color: BAR_COLORS.flexi },
+              ].map(({ data, color }) => {
+                const pts = data.map(d => `${toX(d.year)},${toY(d.value)}`).join(" ");
+                return (
+                  <polyline key={color} points={pts} fill="none" stroke={color}
+                    strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                );
+              })}
+              <line x1={toX(year)} x2={toX(year)} y1={10} y2={150}
+                stroke="#ffffff33" strokeWidth="1.5" strokeDasharray="3,3" />
+              {[0, 1, 2, 3, 4, 5].map(y => (
+                <text key={y} x={toX(y)} y={158} textAnchor="middle" fontSize={9} fill="#3a4060">{y}r</text>
+              ))}
+            </svg>
+            <div style={{ display: "flex", gap: 20, marginTop: 10, flexWrap: "wrap" }}>
+              {[
+                { label: "Fixní", color: BAR_COLORS.fixed },
+                { label: `Protiinflační (ø ${fmtPct(avgInfl)})`, color: BAR_COLORS.inflation },
+                { label: "Flexi Bond", color: BAR_COLORS.flexi },
+              ].map(l => (
+                <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#5a6080" }}>
+                  <div style={{ width: 20, height: 3, background: l.color, borderRadius: 2 }} />
+                  {l.label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div style={{ background: "#13182a", border: "1px solid #1e2540", borderRadius: 12, padding: "18px 22px", fontSize: 12, color: "#5a6080", lineHeight: 1.7 }}>
+            <div style={{ color: "#a0a8c0", fontWeight: 600, marginBottom: 8, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              Důležité upozornění
+            </div>
+            <div>• Výnosy jsou <strong style={{ color: "#e8eaf2" }}>osvobozeny od srážkové daně 15 %</strong> – částky jsou čisté</div>
+            <div>• Fixní dluhopis má <strong style={{ color: "#e8eaf2" }}>stupňovité úročení</strong> – při výběru po 2 letech jen 3,5 % ročně místo 4,544 %</div>
+            <div>• Protiinflační výnos = <strong style={{ color: "#e8eaf2" }}>skutečná meziroční inflace</strong> každý rok (tvůj scénář)</div>
+            <div>• Flexi Bond se <strong style={{ color: "#e8eaf2" }}>automaticky obnovuje</strong> – sazba se může každé čtvrtletí změnit</div>
+            <div>• Limit 3 mil. Kč je <strong style={{ color: "#e8eaf2" }}>na každý typ zvlášť</strong> – celkem lze investovat až 9 mil. Kč</div>
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: 28, fontSize: 10, color: "#2a3050", letterSpacing: "0.1em" }}>
+            pssd.sporicidluhopisycr.cz · Kalkulace jsou orientační
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
