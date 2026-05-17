@@ -58,10 +58,10 @@
     }
 
     .tile-label {
-      font-size: 9px;
-      letter-spacing: 0.18em;
+      font-size: 11px;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: #5a6080;
+      color: #8090b8;
       margin-bottom: 6px;
       flex-shrink: 0;
     }
@@ -220,13 +220,13 @@
     function SliderRow({ label, value, onChange, dimmed }) {
       return (
         <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5, opacity: dimmed ? 0.35 : 1, transition:"opacity 0.2s" }}>
-          <span style={{ fontSize:10, color:"#5a6080", minWidth:50, flexShrink:0 }}>{label}</span>
+          <span style={{ fontSize:12, color:"#8090b8", minWidth:54, flexShrink:0 }}>{label}</span>
           <input type="range" min={0} max={15} step={0.5} value={value*100}
             onChange={e => onChange(Number(e.target.value)/100)}
             style={{ flex:1, "--accent": BAR_COLORS.inflation }} disabled={dimmed} />
           <span style={{
-            fontSize:12, fontWeight:700, minWidth:38, textAlign:"right",
-            color: value>=0.05 ? "#ff7a3d" : value>=0.03 ? "#e8eaf2" : "#a0a8c0",
+            fontSize:13, fontWeight:700, minWidth:42, textAlign:"right",
+            color: value>=0.05 ? "#ff7a3d" : value>=0.03 ? "#e8eaf2" : "#b0b8d0",
           }}>{fmtPct(value)}</span>
         </div>
       );
@@ -275,7 +275,7 @@
             <div className="tile">
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
                 <div>
-                  <div style={{ fontSize:9, letterSpacing:"0.2em", color:"#5a6080", textTransform:"uppercase", marginBottom:3 }}>{t.headerSub}</div>
+                  <div style={{ fontSize:11, letterSpacing:"0.15em", color:"#8090b8", textTransform:"uppercase", marginBottom:3 }}>{t.headerSub}</div>
                   <h1 style={{ fontSize:"clamp(16px,2vw,22px)", fontWeight:700, fontFamily:"'DM Serif Display',Georgia,serif", color:"#fff", lineHeight:1.1 }}>
                     {t.headerTitle}
                   </h1>
@@ -285,7 +285,7 @@
               <div>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
                   <div className="tile-label" style={{ marginBottom:0 }}>{t.investmentLabel}</div>
-                  <span style={{ fontSize:16, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif" }}>{fmtInv(investment, lang)}</span>
+                  <span style={{ fontSize:19, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif" }}>{fmtInv(investment, lang)}</span>
                 </div>
                 <input type="range" min={1_000} max={3_000_000} step={1_000} value={investment}
                   onChange={e => setInvestment(Number(e.target.value))}
@@ -309,15 +309,15 @@
             <div className="tile">
               <div className="tile-label">{t.periodLabel}</div>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                <span style={{ fontSize:28, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif" }}>{year}</span>
-                <span style={{ fontSize:15, color:"#a0a8c0" }}>{t.yearWord(year)}</span>
+                <span style={{ fontSize:32, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif" }}>{year}</span>
+                <span style={{ fontSize:16, color:"#b0b8d0" }}>{t.yearWord(year)}</span>
               </div>
               <input type="range" min={1} max={5} value={year}
                 onChange={e => setYear(Number(e.target.value))}
                 style={{ "--accent":"#1a6fff" }} />
-              <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, marginTop:6 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, marginTop:6 }}>
                 {[1,2,3,4,5].map(y => (
-                  <span key={y} style={{ color: y===year ? "#1a6fff" : "#3a4060", fontWeight: y===year ? 700 : 400 }}>
+                  <span key={y} style={{ color: y===year ? "#1a6fff" : "#6070a0", fontWeight: y===year ? 700 : 400 }}>
                     {y}{t.yearShort}
                   </span>
                 ))}
@@ -328,8 +328,8 @@
             <div className="tile" style={{ borderColor:"#ff7a3d33" }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
                 <div>
-                  <div style={{ fontSize:9, letterSpacing:"0.15em", textTransform:"uppercase", color:"#ff7a3d" }}>🟠 {t.inflationTitle}</div>
-                  <div style={{ fontSize:10, color:"#5a6080", marginTop:2 }}>
+                  <div style={{ fontSize:11, letterSpacing:"0.12em", textTransform:"uppercase", color:"#ff7a3d" }}>🟠 {t.inflationTitle}</div>
+                  <div style={{ fontSize:12, color:"#8090b8", marginTop:2 }}>
                     {t.inflationAvg(year)}: <strong style={{ color:"#ff7a3d" }}>{fmtPct(avgInfl)}</strong>
                   </div>
                 </div>
@@ -380,10 +380,10 @@
               <div className="tile-label">{t.notesTitle}</div>
               <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"space-around" }}>
                 {t.notes.map((n, i) => (
-                  <div key={i} style={{ fontSize:10, color:"#4a5070", lineHeight:1.4 }}>· {n}</div>
+                  <div key={i} style={{ fontSize:12, color:"#8090b8", lineHeight:1.5 }}>· {n}</div>
                 ))}
               </div>
-              <div style={{ fontSize:9, color:"#2a3050", marginTop:6, letterSpacing:"0.08em" }}>
+              <div style={{ fontSize:11, color:"#6070a0", marginTop:6, letterSpacing:"0.08em" }}>
                 pssd.sporicidluhopisycr.cz
               </div>
             </div>
@@ -411,7 +411,7 @@
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:3 }}>
                         <span style={{ fontSize:16 }}>{b.icon}</span>
-                        <span style={{ fontSize:15, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif" }}>{b.label}</span>
+                        <span style={{ fontSize:17, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif" }}>{b.label}</span>
                         {isMax && (
                           <span style={{
                             background:b.color, color:"#000", fontSize:8, fontWeight:700,
@@ -419,20 +419,20 @@
                           }}>{t.bestYield}</span>
                         )}
                       </div>
-                      <div style={{ fontSize:11, color:"#5a6080", marginBottom:4 }}>{b.sublabel}</div>
-                      <div style={{ fontSize:10, color:"#3a4060" }}>⚠ {b.note}</div>
+                      <div style={{ fontSize:13, color:"#8090b8", marginBottom:4 }}>{b.sublabel}</div>
+                      <div style={{ fontSize:12, color:"#7080a8" }}>⚠ {b.note}</div>
                     </div>
 
                     {/* right: value + gain + annual */}
                     <div style={{ textAlign:"right", flexShrink:0 }}>
-                      <div style={{ fontSize:22, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif", lineHeight:1 }}>
+                      <div style={{ fontSize:26, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif", lineHeight:1 }}>
                         {fmt(b.data.value)}
                       </div>
-                      <div style={{ fontSize:14, color:b.color, fontWeight:600, marginTop:4 }}>
+                      <div style={{ fontSize:16, color:b.color, fontWeight:600, marginTop:4 }}>
                         {fmtGain(b.data.gain)}
                       </div>
-                      <div style={{ fontSize:10, color:"#3a4060", marginTop:6 }}>
-                        {t.annualAvg}: <span style={{ color:"#a0a8c0" }}>{fmt(Math.round(b.data.gain/year))} {t.perYear}</span>
+                      <div style={{ fontSize:12, color:"#8090b8", marginTop:6 }}>
+                        {t.annualAvg}: <span style={{ color:"#c8d0e0" }}>{fmt(Math.round(b.data.gain/year))} {t.perYear}</span>
                       </div>
                     </div>
                   </div>
@@ -457,7 +457,7 @@
                 {[0,1,2].map(i => {
                   const val = chartMax - (i/2)*(chartMax-chartMin);
                   return (
-                    <text key={i} x={40} y={14+i*35} textAnchor="end" fontSize={8} fill="#3a4060">
+                    <text key={i} x={40} y={14+i*35} textAnchor="end" fontSize={8} fill="#6070a0">
                       {(val/1_000_000).toFixed(2)}M
                     </text>
                   );
@@ -474,7 +474,7 @@
                 <line x1={toX(year)} x2={toX(year)} y1={2} y2={90}
                   stroke="#ffffff22" strokeWidth="1.5" strokeDasharray="3,3" />
                 {[0,1,2,3,4,5].map(y => (
-                  <text key={y} x={toX(y)} y={93} textAnchor="middle" fontSize={8} fill="#3a4060">
+                  <text key={y} x={toX(y)} y={93} textAnchor="middle" fontSize={8} fill="#6070a0">
                     {y}{t.yearShort}
                   </text>
                 ))}
@@ -485,7 +485,7 @@
                   { label:t.legendInflation(fmtPct(avgInfl)), color:BAR_COLORS.inflation },
                   { label:t.legendFlexi,                      color:BAR_COLORS.flexi },
                 ].map(l => (
-                  <div key={l.label} style={{ display:"flex", alignItems:"center", gap:5, fontSize:10, color:"#5a6080" }}>
+                  <div key={l.label} style={{ display:"flex", alignItems:"center", gap:5, fontSize:12, color:"#8090b8" }}>
                     <div style={{ width:14, height:3, background:l.color, borderRadius:2 }} />
                     {l.label}
                   </div>
