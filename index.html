@@ -19,8 +19,7 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 340px 1fr;
-      grid-template-rows: 100vh;
+      grid-template-columns: 360px 1fr;
       height: 100vh;
       font-family: 'DM Mono', 'Fira Mono', 'Courier New', monospace;
       color: #e8eaf2;
@@ -29,8 +28,8 @@
     .left-col {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 20px 18px 20px 20px;
+      gap: 8px;
+      padding: 16px 14px 16px 16px;
       border-right: 1px solid #1e2540;
       overflow: hidden;
     }
@@ -38,53 +37,41 @@
     .right-col {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 20px 20px 20px 18px;
+      gap: 8px;
+      padding: 16px 16px 16px 14px;
       overflow: hidden;
     }
 
-    .panel {
-      background: #13182a;
-      border: 1px solid #1e2540;
-      border-radius: 10px;
-      padding: 12px 14px;
-    }
-
-    .panel-label {
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #5a6080;
-      margin-bottom: 8px;
-    }
-
-    .card {
-      background: #13182a;
-      border: 1px solid #1e2540;
-      border-radius: 10px;
-      padding: 16px 16px;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s;
+    /* every direct panel child grows equally */
+    .left-col > .tile,
+    .right-col > .tile {
       flex: 1;
+      min-height: 0;
+      background: #13182a;
+      border: 1px solid #1e2540;
+      border-radius: 10px;
+      padding: 12px 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-    }
-    .card.best {
-      background: #0f1e38;
+      overflow: hidden;
     }
 
-    /* mobile fallback – scroll allowed below 800px */
+    .tile-label {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #5a6080;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+
     @media (max-width: 800px) {
       body { overflow: auto; }
-      .layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto;
-        height: auto;
-      }
-      .left-col, .right-col { padding: 16px; border-right: none; }
+      .layout { grid-template-columns: 1fr; height: auto; }
+      .left-col, .right-col { padding: 12px; border-right: none; }
       .left-col { border-bottom: 1px solid #1e2540; }
+      .left-col > .tile, .right-col > .tile { flex: 0 0 auto; min-height: 120px; }
     }
   </style>
 </head>
@@ -120,7 +107,7 @@
         yearWord: (y) => y === 1 ? "rok" : y < 5 ? "roky" : "let",
         yearShort: "r",
         inflationTitle: "Scénář inflace",
-        inflationAvg: (y) => `Prům. za ${y} ${y === 1 ? "rok" : "let"}`,
+        inflationAvg: (y) => `Průměr za ${y} ${y === 1 ? "rok" : "let"}`,
         modeUnified: "Stejná",
         modePerYear: "Po letech",
         sliderAllYears: "Všechny roky",
@@ -128,9 +115,9 @@
         bestYield: "Nejvyšší výnos",
         annualAvg: "Roční průměr",
         perYear: "/ rok",
-        chartTitle: "Vývoj hodnoty (Kč)",
+        chartTitle: "Vývoj hodnoty v čase (Kč)",
         legendFixed: "Fixní",
-        legendInflation: (pct) => `Protiinfl. (ø ${pct})`,
+        legendInflation: (pct) => `Protiinflační (ø ${pct})`,
         legendFlexi: "Flexi Bond",
         notesTitle: "Upozornění",
         notes: [
@@ -141,9 +128,9 @@
           "Limit 3 mil. Kč na každý typ zvlášť",
         ],
         bonds: (avgInfl) => [
-          { key: "fixed",     label: "Fixní dluhopis", icon: "🔵", sublabel: "5letý · ø 4,544 % p.a.",             note: "Stupňovitý výnos – max v 5. roce" },
-          { key: "inflation", label: "Protiinflační",  icon: "🟠", sublabel: `5letý · CPI ø ${fmtPct(avgInfl)}`,   note: "Výnos = inflace (tvůj scénář)" },
-          { key: "flexi",     label: "Flexi Bond",     icon: "🟢", sublabel: "3měs. · 3,5 % p.a.",                  note: "Obnovuje se každé 3 měsíce" },
+          { key: "fixed",     label: "Fixní dluhopis", icon: "🔵", sublabel: "5letý · ø 4,544 % p.a.",           note: "Stupňovitý výnos – max v 5. roce" },
+          { key: "inflation", label: "Protiinflační",  icon: "🟠", sublabel: `5letý · CPI ø ${fmtPct(avgInfl)}`, note: "Výnos = inflace (tvůj scénář)" },
+          { key: "flexi",     label: "Flexi Bond",     icon: "🟢", sublabel: "3měs. · 3,5 % p.a.",               note: "Obnovuje se každé 3 měsíce" },
         ],
       },
       en: {
@@ -154,7 +141,7 @@
         yearWord: (y) => y === 1 ? "year" : "years",
         yearShort: "y",
         inflationTitle: "Inflation scenario",
-        inflationAvg: (y) => `Avg over ${y} ${y === 1 ? "year" : "years"}`,
+        inflationAvg: (y) => `Average over ${y} ${y === 1 ? "year" : "years"}`,
         modeUnified: "Unified",
         modePerYear: "Per year",
         sliderAllYears: "All years",
@@ -164,7 +151,7 @@
         perYear: "/ yr",
         chartTitle: "Value over time (CZK)",
         legendFixed: "Fixed",
-        legendInflation: (pct) => `Infl.-linked (ø ${pct})`,
+        legendInflation: (pct) => `Inflation-linked (ø ${pct})`,
         legendFlexi: "Flexi Bond",
         notesTitle: "Notice",
         notes: [
@@ -175,39 +162,30 @@
           "3M CZK limit applies per bond type",
         ],
         bonds: (avgInfl) => [
-          { key: "fixed",     label: "Fixed Bond",       icon: "🔵", sublabel: `5-year · ø 4.544% p.a.`,              note: "Stepped yield – max in year 5" },
-          { key: "inflation", label: "Inflation-linked", icon: "🟠", sublabel: `5-year · CPI ø ${fmtPct(avgInfl)}`,    note: "Yield = inflation (your scenario)" },
-          { key: "flexi",     label: "Flexi Bond",       icon: "🟢", sublabel: "3-month · 3.5% p.a.",                  note: "Auto-renews every 3 months" },
+          { key: "fixed",     label: "Fixed Bond",       icon: "🔵", sublabel: "5-year · ø 4.544% p.a.",          note: "Stepped yield – max in year 5" },
+          { key: "inflation", label: "Inflation-linked", icon: "🟠", sublabel: `5-year · CPI ø ${fmtPct(avgInfl)}`, note: "Yield = inflation (your scenario)" },
+          { key: "flexi",     label: "Flexi Bond",       icon: "🟢", sublabel: "3-month · 3.5% p.a.",             note: "Auto-renews every 3 months" },
         ],
       },
     };
 
     function calcFixed(inv) {
       let value = inv;
-      const results = [{ year: 0, value: inv, gain: 0 }];
-      for (let y = 1; y <= 5; y++) {
-        value = value * (1 + FIXED_RATE_BY_YEAR[y - 1]);
-        results.push({ year: y, value: Math.round(value), gain: Math.round(value - inv) });
-      }
-      return results;
+      const r = [{ year: 0, value: inv, gain: 0 }];
+      for (let y = 1; y <= 5; y++) { value *= 1 + FIXED_RATE_BY_YEAR[y-1]; r.push({ year: y, value: Math.round(value), gain: Math.round(value - inv) }); }
+      return r;
     }
     function calcFlexi(inv) {
       let value = inv;
-      const results = [{ year: 0, value: inv, gain: 0 }];
-      for (let y = 1; y <= 5; y++) {
-        value = value * (1 + FLEXI_RATE);
-        results.push({ year: y, value: Math.round(value), gain: Math.round(value - inv) });
-      }
-      return results;
+      const r = [{ year: 0, value: inv, gain: 0 }];
+      for (let y = 1; y <= 5; y++) { value *= 1 + FLEXI_RATE; r.push({ year: y, value: Math.round(value), gain: Math.round(value - inv) }); }
+      return r;
     }
-    function calcInflation(inv, ratesByYear) {
+    function calcInflation(inv, rates) {
       let value = inv;
-      const results = [{ year: 0, value: inv, gain: 0 }];
-      for (let y = 1; y <= 5; y++) {
-        value = value * (1 + ratesByYear[y - 1]);
-        results.push({ year: y, value: Math.round(value), gain: Math.round(value - inv) });
-      }
-      return results;
+      const r = [{ year: 0, value: inv, gain: 0 }];
+      for (let y = 1; y <= 5; y++) { value *= 1 + rates[y-1]; r.push({ year: y, value: Math.round(value), gain: Math.round(value - inv) }); }
+      return r;
     }
 
     function fmt(n) { return n.toLocaleString("cs-CZ") + " Kč"; }
@@ -215,28 +193,25 @@
     function fmtPct(r) { return (r * 100).toFixed(1) + " %"; }
     function fmtInv(n, lang) {
       if (lang === "en") {
-        if (n >= 1_000_000) return (n / 1_000_000).toLocaleString("en-GB", { maximumFractionDigits: 2 }) + "M CZK";
-        if (n >= 1_000)     return (n / 1_000).toLocaleString("en-GB", { maximumFractionDigits: 0 }) + "K CZK";
+        if (n >= 1_000_000) return (n/1_000_000).toLocaleString("en-GB",{maximumFractionDigits:2}) + "M CZK";
+        if (n >= 1_000)     return (n/1_000).toLocaleString("en-GB",{maximumFractionDigits:0}) + "K CZK";
         return n + " CZK";
       }
-      if (n >= 1_000_000) return (n / 1_000_000).toLocaleString("cs-CZ", { maximumFractionDigits: 2 }) + " mil. Kč";
-      if (n >= 1_000)     return (n / 1_000).toLocaleString("cs-CZ", { maximumFractionDigits: 0 }) + " tis. Kč";
+      if (n >= 1_000_000) return (n/1_000_000).toLocaleString("cs-CZ",{maximumFractionDigits:2}) + " mil. Kč";
+      if (n >= 1_000)     return (n/1_000).toLocaleString("cs-CZ",{maximumFractionDigits:0}) + " tis. Kč";
       return n.toLocaleString("cs-CZ") + " Kč";
     }
 
     function LangSwitcher({ lang, setLang }) {
       return (
         <div style={{ display: "flex", gap: 4 }}>
-          {[{ code: "cs", flag: "🇨🇿" }, { code: "en", flag: "🇬🇧" }].map(({ code, flag }) => (
-            <button key={code} onClick={() => setLang(code)}
-              style={{
-                background: lang === code ? "#1e2540" : "transparent",
-                border: `1px solid ${lang === code ? "#3a4060" : "transparent"}`,
-                borderRadius: 7, padding: "3px 8px", cursor: "pointer",
-                fontFamily: "inherit", fontSize: 16, lineHeight: 1.2,
-                transition: "all 0.15s",
-              }}
-            >{flag}</button>
+          {[{ code:"cs", flag:"🇨🇿" }, { code:"en", flag:"🇬🇧" }].map(({ code, flag }) => (
+            <button key={code} onClick={() => setLang(code)} style={{
+              background: lang === code ? "#1e2540" : "transparent",
+              border: `1px solid ${lang === code ? "#3a4060" : "transparent"}`,
+              borderRadius: 7, padding: "3px 8px", cursor: "pointer",
+              fontFamily: "inherit", fontSize: 16, lineHeight: 1.2, transition: "all 0.15s",
+            }}>{flag}</button>
           ))}
         </div>
       );
@@ -244,17 +219,14 @@
 
     function SliderRow({ label, value, onChange, dimmed }) {
       return (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, opacity: dimmed ? 0.35 : 1, transition: "opacity 0.2s" }}>
-          <span style={{ fontSize: 10, color: "#5a6080", minWidth: 46 }}>{label}</span>
-          <input type="range" min={0} max={15} step={0.5}
-            value={value * 100}
-            onChange={e => onChange(Number(e.target.value) / 100)}
-            style={{ flex: 1, "--accent": BAR_COLORS.inflation }}
-            disabled={dimmed}
-          />
+        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5, opacity: dimmed ? 0.35 : 1, transition:"opacity 0.2s" }}>
+          <span style={{ fontSize:10, color:"#5a6080", minWidth:50, flexShrink:0 }}>{label}</span>
+          <input type="range" min={0} max={15} step={0.5} value={value*100}
+            onChange={e => onChange(Number(e.target.value)/100)}
+            style={{ flex:1, "--accent": BAR_COLORS.inflation }} disabled={dimmed} />
           <span style={{
-            fontSize: 11, fontWeight: 700, minWidth: 38, textAlign: "right",
-            color: value >= 0.05 ? "#ff7a3d" : value >= 0.03 ? "#e8eaf2" : "#a0a8c0",
+            fontSize:12, fontWeight:700, minWidth:38, textAlign:"right",
+            color: value>=0.05 ? "#ff7a3d" : value>=0.03 ? "#e8eaf2" : "#a0a8c0",
           }}>{fmtPct(value)}</span>
         </div>
       );
@@ -266,7 +238,7 @@
       const [year, setYear] = useState(5);
       const [inflMode, setInflMode] = useState("unified");
       const [unifiedRate, setUnifiedRate] = useState(0.035);
-      const [perYearRates, setPerYearRates] = useState([0.025, 0.030, 0.035, 0.040, 0.045]);
+      const [perYearRates, setPerYearRates] = useState([0.025,0.030,0.035,0.040,0.045]);
 
       const t = TR[lang];
       const inflRates = inflMode === "unified" ? Array(5).fill(unifiedRate) : perYearRates;
@@ -275,11 +247,10 @@
       const flexiData     = calcFlexi(investment);
       const inflationData = calcInflation(investment, inflRates);
 
-      const avgInfl     = inflRates.slice(0, year).reduce((a, b) => a + b, 0) / year;
-      const fixedAtYear  = fixedData[year];
-      const flexiAtYear  = flexiData[year];
-      const inflAtYear   = inflationData[year];
-
+      const avgInfl    = inflRates.slice(0, year).reduce((a,b) => a+b, 0) / year;
+      const fixedAtYear = fixedData[year];
+      const flexiAtYear = flexiData[year];
+      const inflAtYear  = inflationData[year];
       const maxVal = Math.max(fixedAtYear.value, flexiAtYear.value, inflAtYear.value);
 
       const bonds = t.bonds(avgInfl).map((b, i) => ({
@@ -288,260 +259,240 @@
         data:  [fixedAtYear, inflAtYear, flexiAtYear][i],
       }));
 
-      const allVals  = [...fixedData, ...flexiData, ...inflationData].map(d => d.value);
+      const allVals  = [...fixedData,...flexiData,...inflationData].map(d => d.value);
       const chartMax = Math.max(...allVals);
       const chartMin = investment;
-      const toX = y => 44 + (y / 5) * 390;
-      const toY = v => 60 - ((v - chartMin) / (chartMax - chartMin + 1)) * 50;
+      const toX = y => 44 + (y/5)*390;
+      const toY = v => 85 - ((v-chartMin)/(chartMax-chartMin+1))*75;
 
       return (
         <div className="layout">
 
-          {/* ── LEFT COLUMN: controls ── */}
+          {/* ── LEFT: controls ── */}
           <div className="left-col">
 
-            {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#5a6080", textTransform: "uppercase", marginBottom: 4 }}>
-                  {t.headerSub}
+            {/* Tile 1: header + investment */}
+            <div className="tile">
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                <div>
+                  <div style={{ fontSize:9, letterSpacing:"0.2em", color:"#5a6080", textTransform:"uppercase", marginBottom:3 }}>{t.headerSub}</div>
+                  <h1 style={{ fontSize:"clamp(16px,2vw,22px)", fontWeight:700, fontFamily:"'DM Serif Display',Georgia,serif", color:"#fff", lineHeight:1.1 }}>
+                    {t.headerTitle}
+                  </h1>
                 </div>
-                <h1 style={{
-                  fontSize: "clamp(18px, 2.5vw, 24px)", fontWeight: 700,
-                  fontFamily: "'DM Serif Display', Georgia, serif",
-                  color: "#fff", lineHeight: 1.1,
-                }}>
-                  {t.headerTitle}
-                </h1>
+                <LangSwitcher lang={lang} setLang={setLang} />
               </div>
-              <LangSwitcher lang={lang} setLang={setLang} />
-            </div>
-
-            {/* Investment amount */}
-            <div className="panel">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <div className="panel-label" style={{ marginBottom: 0 }}>{t.investmentLabel}</div>
-                <span style={{ fontSize: 17, fontWeight: 700, color: "#fff", fontFamily: "'DM Serif Display', Georgia, serif" }}>
-                  {fmtInv(investment, lang)}
-                </span>
-              </div>
-              <input type="range" min={1_000} max={3_000_000} step={1_000} value={investment}
-                onChange={e => setInvestment(Number(e.target.value))}
-                style={{ "--accent": "#a0a8c0" }}
-              />
-              <div style={{ display: "flex", gap: 4, marginTop: 10, flexWrap: "wrap" }}>
-                {PRESETS.map(p => (
-                  <button key={p.value} onClick={() => setInvestment(p.value)}
-                    style={{
-                      flex: "1 1 auto",
-                      background: investment === p.value ? "#e8eaf2" : "#0b0f1a",
-                      color: investment === p.value ? "#0b0f1a" : "#5a6080",
-                      border: `1px solid ${investment === p.value ? "#e8eaf2" : "#1e2540"}`,
-                      borderRadius: 6, padding: "5px 6px",
-                      fontSize: 11, fontWeight: 700, cursor: "pointer",
-                      fontFamily: "inherit", transition: "all 0.15s", whiteSpace: "nowrap",
-                    }}
-                  >{p[lang]}</button>
-                ))}
+              <div>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
+                  <div className="tile-label" style={{ marginBottom:0 }}>{t.investmentLabel}</div>
+                  <span style={{ fontSize:16, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif" }}>{fmtInv(investment, lang)}</span>
+                </div>
+                <input type="range" min={1_000} max={3_000_000} step={1_000} value={investment}
+                  onChange={e => setInvestment(Number(e.target.value))}
+                  style={{ "--accent":"#a0a8c0" }} />
+                <div style={{ display:"flex", gap:4, marginTop:8, flexWrap:"wrap" }}>
+                  {PRESETS.map(p => (
+                    <button key={p.value} onClick={() => setInvestment(p.value)} style={{
+                      flex:"1 1 auto",
+                      background: investment===p.value ? "#e8eaf2" : "#0b0f1a",
+                      color: investment===p.value ? "#0b0f1a" : "#5a6080",
+                      border: `1px solid ${investment===p.value ? "#e8eaf2" : "#1e2540"}`,
+                      borderRadius:6, padding:"5px 4px", fontSize:11, fontWeight:700,
+                      cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s", whiteSpace:"nowrap",
+                    }}>{p[lang]}</button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Year slider */}
-            <div className="panel">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <div className="panel-label" style={{ marginBottom: 0 }}>{t.periodLabel}</div>
-                <span style={{ fontSize: 17, fontWeight: 700, color: "#fff", fontFamily: "'DM Serif Display', Georgia, serif" }}>
-                  {year} {t.yearWord(year)}
-                </span>
+            {/* Tile 2: year */}
+            <div className="tile">
+              <div className="tile-label">{t.periodLabel}</div>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+                <span style={{ fontSize:28, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif" }}>{year}</span>
+                <span style={{ fontSize:15, color:"#a0a8c0" }}>{t.yearWord(year)}</span>
               </div>
               <input type="range" min={1} max={5} value={year}
                 onChange={e => setYear(Number(e.target.value))}
-                style={{ "--accent": "#1a6fff" }}
-              />
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, marginTop: 5 }}>
+                style={{ "--accent":"#1a6fff" }} />
+              <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, marginTop:6 }}>
                 {[1,2,3,4,5].map(y => (
-                  <span key={y} style={{ color: y === year ? "#1a6fff" : "#3a4060", fontWeight: y === year ? 700 : 400 }}>
+                  <span key={y} style={{ color: y===year ? "#1a6fff" : "#3a4060", fontWeight: y===year ? 700 : 400 }}>
                     {y}{t.yearShort}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Inflation */}
-            <div className="panel" style={{ borderColor: "#ff7a3d33", flex: 1, display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            {/* Tile 3: inflation */}
+            <div className="tile" style={{ borderColor:"#ff7a3d33" }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
                 <div>
-                  <div style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#ff7a3d" }}>
-                    🟠 {t.inflationTitle}
-                  </div>
-                  <div style={{ fontSize: 10, color: "#5a6080", marginTop: 2 }}>
-                    {t.inflationAvg(year)}: <strong style={{ color: "#ff7a3d" }}>{fmtPct(avgInfl)}</strong>
+                  <div style={{ fontSize:9, letterSpacing:"0.15em", textTransform:"uppercase", color:"#ff7a3d" }}>🟠 {t.inflationTitle}</div>
+                  <div style={{ fontSize:10, color:"#5a6080", marginTop:2 }}>
+                    {t.inflationAvg(year)}: <strong style={{ color:"#ff7a3d" }}>{fmtPct(avgInfl)}</strong>
                   </div>
                 </div>
-                <div style={{ display: "flex", background: "#0b0f1a", borderRadius: 6, padding: 2, gap: 2 }}>
-                  {[["unified", t.modeUnified], ["peryear", t.modePerYear]].map(([val, lbl]) => (
-                    <button key={val} onClick={() => setInflMode(val)}
-                      style={{
-                        background: inflMode === val ? "#ff7a3d" : "transparent",
-                        color: inflMode === val ? "#000" : "#5a6080",
-                        border: "none", borderRadius: 5, padding: "4px 8px",
-                        fontSize: 10, fontWeight: 700, cursor: "pointer",
-                        fontFamily: "inherit", transition: "all 0.2s", whiteSpace: "nowrap",
-                      }}
-                    >{lbl}</button>
+                <div style={{ display:"flex", background:"#0b0f1a", borderRadius:6, padding:2, gap:2 }}>
+                  {[["unified", t.modeUnified],["peryear", t.modePerYear]].map(([val, lbl]) => (
+                    <button key={val} onClick={() => setInflMode(val)} style={{
+                      background: inflMode===val ? "#ff7a3d" : "transparent",
+                      color: inflMode===val ? "#000" : "#5a6080",
+                      border:"none", borderRadius:5, padding:"4px 8px",
+                      fontSize:10, fontWeight:700, cursor:"pointer",
+                      fontFamily:"inherit", transition:"all 0.2s", whiteSpace:"nowrap",
+                    }}>{lbl}</button>
                   ))}
                 </div>
               </div>
-
-              <div style={{ flex: 1 }}>
-                {inflMode === "unified" ? (
-                  <SliderRow label={t.sliderAllYears} value={unifiedRate} onChange={setUnifiedRate} dimmed={false} />
-                ) : (
-                  [1,2,3,4,5].map(y => (
-                    <SliderRow key={y} label={t.sliderYear(y)}
-                      value={perYearRates[y - 1]}
-                      dimmed={y > year}
-                      onChange={v => {
-                        const next = [...perYearRates];
-                        next[y - 1] = v;
-                        setPerYearRates(next);
-                      }}
-                    />
-                  ))
-                )}
+              <div style={{ flex:1 }}>
+                {inflMode === "unified"
+                  ? <SliderRow label={t.sliderAllYears} value={unifiedRate} onChange={setUnifiedRate} dimmed={false} />
+                  : [1,2,3,4,5].map(y => (
+                      <SliderRow key={y} label={t.sliderYear(y)}
+                        value={perYearRates[y-1]} dimmed={y>year}
+                        onChange={v => { const n=[...perYearRates]; n[y-1]=v; setPerYearRates(n); }} />
+                    ))
+                }
               </div>
-
-              {/* Mini bar chart */}
-              <div style={{ display: "flex", gap: 3, marginTop: 8 }}>
+              <div style={{ display:"flex", gap:3, marginTop:6 }}>
                 {inflRates.map((r, i) => (
-                  <div key={i} style={{ flex: 1, textAlign: "center" }}>
+                  <div key={i} style={{ flex:1, textAlign:"center" }}>
                     <div style={{
-                      height: 24, background: "#0b0f1a", borderRadius: 3, position: "relative",
-                      overflow: "hidden",
-                      border: i < year ? "1px solid #ff7a3d44" : "1px solid #1e2540",
-                      opacity: i < year ? 1 : 0.3,
+                      height:20, background:"#0b0f1a", borderRadius:3, position:"relative", overflow:"hidden",
+                      border: i<year ? "1px solid #ff7a3d44" : "1px solid #1e2540", opacity: i<year ? 1 : 0.3,
                     }}>
                       <div style={{
-                        position: "absolute", bottom: 0, left: 0, right: 0,
-                        height: `${Math.max(4, (r / 0.15) * 100)}%`,
-                        background: "linear-gradient(to top, #ff7a3d, #ff7a3d88)",
-                        transition: "height 0.3s ease",
+                        position:"absolute", bottom:0, left:0, right:0,
+                        height:`${Math.max(4,(r/0.15)*100)}%`,
+                        background:"linear-gradient(to top,#ff7a3d,#ff7a3d88)",
+                        transition:"height 0.3s ease",
                       }} />
                     </div>
-                    <div style={{ fontSize: 8, color: i < year ? "#ff7a3d" : "#3a4060", marginTop: 2 }}>{fmtPct(r)}</div>
+                    <div style={{ fontSize:8, color: i<year ? "#ff7a3d" : "#3a4060", marginTop:2 }}>{fmtPct(r)}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Notes */}
-            <div style={{ background: "#13182a", border: "1px solid #1e2540", borderRadius: 10, padding: "10px 12px" }}>
-              <div style={{ fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "#3a4060", marginBottom: 6 }}>
-                {t.notesTitle}
+            {/* Tile 4: notes */}
+            <div className="tile">
+              <div className="tile-label">{t.notesTitle}</div>
+              <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"space-around" }}>
+                {t.notes.map((n, i) => (
+                  <div key={i} style={{ fontSize:10, color:"#4a5070", lineHeight:1.4 }}>· {n}</div>
+                ))}
               </div>
-              {t.notes.map((n, i) => (
-                <div key={i} style={{ fontSize: 10, color: "#3a4060", lineHeight: 1.5 }}>· {n}</div>
-              ))}
+              <div style={{ fontSize:9, color:"#2a3050", marginTop:6, letterSpacing:"0.08em" }}>
+                pssd.sporicidluhopisycr.cz
+              </div>
             </div>
           </div>
 
-          {/* ── RIGHT COLUMN: results ── */}
+          {/* ── RIGHT: results ── */}
           <div className="right-col">
 
-            {/* 3 bond cards */}
-            <div style={{ display: "flex", gap: 10, flex: 1, minHeight: 0 }}>
-              {bonds.map((b) => {
-                const isMax = b.data.value === maxVal;
-                const gainPct = ((b.data.gain / investment) * 100).toFixed(1);
-                return (
-                  <div key={b.key} className={`card${isMax ? " best" : ""}`}
-                    style={{ border: `1px solid ${isMax ? b.color + "55" : "#1e2540"}` }}
-                  >
-                    {isMax && (
-                      <div style={{
-                        position: "absolute", top: 8, right: 8,
-                        background: b.color, color: "#000", fontSize: 8,
-                        fontWeight: 700, letterSpacing: "0.1em",
-                        padding: "2px 6px", borderRadius: 4, textTransform: "uppercase",
-                      }}>{t.bestYield}</div>
-                    )}
-                    <div style={{
-                      position: "absolute", bottom: 0, left: 0, height: 3, right: 0,
-                      background: `linear-gradient(90deg, ${b.color}44, ${b.color})`,
-                      borderRadius: "0 0 10px 10px",
-                    }} />
-                    <div style={{ fontSize: 11, color: "#5a6080", marginBottom: 4 }}>{b.icon} {b.sublabel}</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", fontFamily: "'DM Serif Display', Georgia, serif", marginBottom: 2 }}>
-                      {b.label}
-                    </div>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", fontFamily: "'DM Serif Display', Georgia, serif", marginTop: 6 }}>
-                      {fmt(b.data.value)}
-                    </div>
-                    <div style={{ fontSize: 13, color: b.color, fontWeight: 600, marginTop: 2 }}>
-                      {fmtGain(b.data.gain)}
-                    </div>
-                    <div style={{ marginTop: 8, background: "#0b0f1a", borderRadius: 6, padding: "6px 10px", display: "flex", justifyContent: "space-between", fontSize: 10 }}>
-                      <span style={{ color: "#3a4060" }}>{t.annualAvg}</span>
-                      <span style={{ color: "#a0a8c0" }}>{fmt(Math.round(b.data.gain / year))} {t.perYear}</span>
-                    </div>
-                    <div style={{ marginTop: 6, fontSize: 10, color: "#2a3050" }}>⚠ {b.note}</div>
-                  </div>
-                );
-              })}
-            </div>
+            {/* Bond cards – one per tile, side info layout */}
+            {bonds.map((b) => {
+              const isMax = b.data.value === maxVal;
+              return (
+                <div key={b.key} className="tile"
+                  style={{
+                    borderColor: isMax ? b.color + "66" : "#1e2540",
+                    background: isMax ? "#0d1c35" : "#13182a",
+                    position:"relative", overflow:"hidden",
+                  }}
+                >
+                  {/* coloured left border accent */}
+                  <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3, background:b.color, borderRadius:"10px 0 0 10px" }} />
 
-            {/* Line chart */}
-            <div className="panel" style={{ flex: "0 0 auto", display: "flex", flexDirection: "column" }}>
-              <div className="panel-label">{t.chartTitle}</div>
-              <svg viewBox="0 0 480 70" style={{ width: "100%", height: 70 }} preserveAspectRatio="none">
-                {[0,1].map(i => (
-                  <line key={i} x1={44} x2={444} y1={8 + i * 26} y2={8 + i * 26}
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, paddingLeft:8 }}>
+                    {/* left: name + sublabel + note */}
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:3 }}>
+                        <span style={{ fontSize:16 }}>{b.icon}</span>
+                        <span style={{ fontSize:15, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif" }}>{b.label}</span>
+                        {isMax && (
+                          <span style={{
+                            background:b.color, color:"#000", fontSize:8, fontWeight:700,
+                            letterSpacing:"0.1em", padding:"2px 6px", borderRadius:4, textTransform:"uppercase", whiteSpace:"nowrap",
+                          }}>{t.bestYield}</span>
+                        )}
+                      </div>
+                      <div style={{ fontSize:11, color:"#5a6080", marginBottom:4 }}>{b.sublabel}</div>
+                      <div style={{ fontSize:10, color:"#3a4060" }}>⚠ {b.note}</div>
+                    </div>
+
+                    {/* right: value + gain + annual */}
+                    <div style={{ textAlign:"right", flexShrink:0 }}>
+                      <div style={{ fontSize:22, fontWeight:700, color:"#fff", fontFamily:"'DM Serif Display',Georgia,serif", lineHeight:1 }}>
+                        {fmt(b.data.value)}
+                      </div>
+                      <div style={{ fontSize:14, color:b.color, fontWeight:600, marginTop:4 }}>
+                        {fmtGain(b.data.gain)}
+                      </div>
+                      <div style={{ fontSize:10, color:"#3a4060", marginTop:6 }}>
+                        {t.annualAvg}: <span style={{ color:"#a0a8c0" }}>{fmt(Math.round(b.data.gain/year))} {t.perYear}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* bottom progress bar */}
+                  <div style={{
+                    position:"absolute", bottom:0, left:0, right:0, height:2,
+                    background:`linear-gradient(90deg,${b.color}33,${b.color})`,
+                  }} />
+                </div>
+              );
+            })}
+
+            {/* Chart tile */}
+            <div className="tile">
+              <div className="tile-label">{t.chartTitle}</div>
+              <svg viewBox="0 0 480 95" style={{ width:"100%", flex:1 }} preserveAspectRatio="none">
+                {[0,1,2].map(i => (
+                  <line key={i} x1={44} x2={444} y1={10+i*35} y2={10+i*35}
                     stroke="#1e2540" strokeWidth="1" strokeDasharray="4,4" />
                 ))}
-                {[0,1].map(i => {
-                  const val = chartMax - (i / 1) * (chartMax - chartMin);
+                {[0,1,2].map(i => {
+                  const val = chartMax - (i/2)*(chartMax-chartMin);
                   return (
-                    <text key={i} x={40} y={12 + i * 26} textAnchor="end" fontSize={7} fill="#3a4060">
-                      {(val / 1_000_000).toFixed(2)}M
+                    <text key={i} x={40} y={14+i*35} textAnchor="end" fontSize={8} fill="#3a4060">
+                      {(val/1_000_000).toFixed(2)}M
                     </text>
                   );
                 })}
                 {[
-                  { data: fixedData,     color: BAR_COLORS.fixed },
-                  { data: inflationData, color: BAR_COLORS.inflation },
-                  { data: flexiData,     color: BAR_COLORS.flexi },
-                ].map(({ data, color }) => {
-                  const pts = data.map(d => `${toX(d.year)},${toY(d.value)}`).join(" ");
-                  return (
-                    <polyline key={color} points={pts} fill="none" stroke={color}
-                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  );
-                })}
-                <line x1={toX(year)} x2={toX(year)} y1={2} y2={65}
+                  { data:fixedData,     color:BAR_COLORS.fixed },
+                  { data:inflationData, color:BAR_COLORS.inflation },
+                  { data:flexiData,     color:BAR_COLORS.flexi },
+                ].map(({ data, color }) => (
+                  <polyline key={color}
+                    points={data.map(d => `${toX(d.year)},${toY(d.value)}`).join(" ")}
+                    fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                ))}
+                <line x1={toX(year)} x2={toX(year)} y1={2} y2={90}
                   stroke="#ffffff22" strokeWidth="1.5" strokeDasharray="3,3" />
                 {[0,1,2,3,4,5].map(y => (
-                  <text key={y} x={toX(y)} y={68} textAnchor="middle" fontSize={7} fill="#3a4060">
+                  <text key={y} x={toX(y)} y={93} textAnchor="middle" fontSize={8} fill="#3a4060">
                     {y}{t.yearShort}
                   </text>
                 ))}
               </svg>
-              <div style={{ display: "flex", gap: 16, marginTop: 8, flexWrap: "wrap" }}>
+              <div style={{ display:"flex", gap:16, marginTop:6, flexWrap:"wrap" }}>
                 {[
-                  { label: t.legendFixed,                      color: BAR_COLORS.fixed },
-                  { label: t.legendInflation(fmtPct(avgInfl)), color: BAR_COLORS.inflation },
-                  { label: t.legendFlexi,                      color: BAR_COLORS.flexi },
+                  { label:t.legendFixed,                      color:BAR_COLORS.fixed },
+                  { label:t.legendInflation(fmtPct(avgInfl)), color:BAR_COLORS.inflation },
+                  { label:t.legendFlexi,                      color:BAR_COLORS.flexi },
                 ].map(l => (
-                  <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, color: "#5a6080" }}>
-                    <div style={{ width: 16, height: 3, background: l.color, borderRadius: 2 }} />
+                  <div key={l.label} style={{ display:"flex", alignItems:"center", gap:5, fontSize:10, color:"#5a6080" }}>
+                    <div style={{ width:14, height:3, background:l.color, borderRadius:2 }} />
                     {l.label}
                   </div>
                 ))}
               </div>
             </div>
 
-            <div style={{ textAlign: "right", fontSize: 9, color: "#2a3050", letterSpacing: "0.1em" }}>
-              pssd.sporicidluhopisycr.cz · Kalkulace jsou orientační
-            </div>
           </div>
         </div>
       );
